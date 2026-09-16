@@ -12,7 +12,8 @@ Hypr-wallpicker a standalone hexagonal wallpaper selector... for Both Wayland an
 
 * **Hexagonal grid UI:** It calculates and renders a proper hexagonal grid for wallpaper thumbnails.
 * **Animations:** It provides scale and brightness transitions on mouse hover.
-* **Auto-caching**: It automatically resizes, crops, and applies a hex-mask to high-res wallpapers for fast subsequent loads.
+* **Versioned thumbnail cache**: It automatically resizes, crops, and applies a hex-mask to high-res wallpapers for fast subsequent loads without reusing stale or colliding thumbnails.
+* **JPEG support independent of Raylib build flags**: It decodes `.jpg` and `.jpeg` source wallpapers through `libjpeg`, even when the system Raylib package has JPEG loading disabled.
 * **Transition:** Integrates with `awww` to trigger ripple transitions directly from the absolute screen coordinates of the clicked hex tile.
 * **Color extraction support:** It supports `matugen` upon selection to dynamically adjust your system theme color based on the chosen wallpaper.
 
@@ -28,8 +29,16 @@ To build `hypr-wallpicker`, you need:
 
 - `gcc`
 - `raylib`
+- `libjpeg-turbo` development headers (`libjpeg` via `pkg-config`) for JPEG wallpaper decoding
 
 `hypr-wallpicker` links against your system `raylib` library.
+
+Thumbnail cache entries are stored below
+`$XDG_CACHE_HOME/wallpicker/thumbnails-v2/` (or
+`~/.cache/wallpicker/thumbnails-v2/` when `XDG_CACHE_HOME` is unset). Their
+identity includes the source file and thumbnail recipe, so changing an image or
+the grid angle produces a fresh thumbnail. Existing legacy cache files are left
+untouched.
 
 ---
 
@@ -175,5 +184,3 @@ hl.window_rule({
     stay_focused = true,
 })
 ```
-
-

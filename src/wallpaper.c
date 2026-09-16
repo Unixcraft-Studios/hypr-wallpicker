@@ -2,9 +2,11 @@
 
 #include "wallpaper.h"
 #include "fs.h"
+#include "jpeg_loader.h"
 #include "raylib.h"
 
 #include <dirent.h>
+#include <errno.h>
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -14,6 +16,8 @@
 static Image GenerateHexMask(int size, float radius, float angle_deg);
 static int CountWallpapers(const char *dir_path);
 static bool LoadSingleWallpaper(App *app, const char *filename);
+static Image LoadSourceImage(const char *file_path);
+static bool ExportThumbnail(Image image, const char *cache_path);
 
 bool InitWallpaperResources(App *app) {
   if (app == NULL) {
@@ -154,7 +158,8 @@ static bool LoadSingleWallpaper(App *app, const char *filename) {
   }
 
   full_img_path = JoinPath(app->wp_dir, filename);
-  cache_img_path = BuildCacheImagePath(app->cache_dir, filename);
+  cache_img_path = BuildCacheImagePath(app->cache_dir, full_img_path,
+                                       app->img_size, app->angle);
 
   if (full_img_path == NULL || cache_img_path == NULL) {
     goto cleanup;
@@ -162,8 +167,15 @@ static bool LoadSingleWallpaper(App *app, const char *filename) {
 
   if (access(cache_img_path, F_OK) == 0) {
     img = LoadImage(cache_img_path);
-  } else {
-    img = LoadImage(full_img_path);
+    if (img.data != NULL &&
+        (img.width != app->img_size || img.height != app->img_size)) {
+      UnloadImage(img);
+      img = (Image){0};
+    }
+  }
+
+  if (img.data == NULL) {
+    img = LoadSourceImage(full_img_path);
 
     if (img.data != NULL && img.width > 1) {
       float scaleX = (float)app->img_size / (float)img.width;
@@ -194,7 +206,7 @@ static bool LoadSingleWallpaper(App *app, const char *filename) {
       ImageFormat(&img, PIXELFORMAT_UNCOMPRESSED_R8G8B8A8);
       ImageAlphaMask(&img, app->hex_mask);
 
-      if (!ExportImage(img, cache_img_path)) {
+      if (!ExportThumbnail(img, cache_img_path)) {
         fprintf(stderr, "Warning: failed to write cache image: %s\n",
                 cache_img_path);
       }
@@ -232,6 +244,51 @@ cleanup:
 
   free(cache_img_path);
   free(full_img_path);
+  return ok;
+}
+
+static Image LoadSourceImage(const char *file_path) {
+  if (HasExtension(file_path, ".jpg") || HasExtension(file_path, ".jpeg")) {
+    return LoadJpegImage(file_path);
+  }
+
+  return LoadImage(file_path);
+}
+
+static bool ExportThumbnail(Image image, const char *cache_path) {
+  int needed;
+  char *temp_path;
+  bool ok;
+
+  if (cache_path == NULL) {
+    return false;
+  }
+
+  needed = snprintf(NULL, 0, "%s.tmp.%ld.png", cache_path, (long)getpid());
+  if (needed < 0) {
+    return false;
+  }
+
+  temp_path = malloc((size_t)needed + 1);
+  if (temp_path == NULL) {
+    return false;
+  }
+
+  snprintf(temp_path, (size_t)needed + 1, "%s.tmp.%ld.png", cache_path,
+           (long)getpid());
+  ok = ExportImage(image, temp_path);
+
+  if (ok && rename(temp_path, cache_path) != 0) {
+    fprintf(stderr, "Warning: failed to publish thumbnail '%s': %s\n",
+            cache_path, strerror(errno));
+    ok = false;
+  }
+
+  if (!ok) {
+    unlink(temp_path);
+  }
+
+  free(temp_path);
   return ok;
 }
 
