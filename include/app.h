@@ -71,11 +71,7 @@ typedef struct {
   float angle;
 } App;
 
-AppConfig AppConfigFromArgs(int argc, char **argv);
 int AppRun(const AppConfig *config);
-
-SessionBackend DetectSessionBackend(void);
-const char *SessionBackendName(SessionBackend backend);
 
 void FreeSelectionResult(SelectionResult *result);
 #endif

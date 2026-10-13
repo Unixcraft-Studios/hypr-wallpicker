@@ -7,50 +7,11 @@
 #include "ui.h"
 #include "wallpaper.h"
 
-#include <errno.h>
-#include <getopt.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 static void AppShutdown(App *app);
-
-SessionBackend DetectSessionBackend(void) {
-  const char *xdg_session_type = getenv("XDG_SESSION_TYPE");
-  const char *wayland_display = getenv("WAYLAND_DISPLAY");
-  const char *display = getenv("DISPLAY");
-
-  if (xdg_session_type != NULL) {
-    if (strcmp(xdg_session_type, "wayland") == 0) {
-      return SESSION_BACKEND_WAYLAND;
-    }
-    if (strcmp(xdg_session_type, "x11") == 0) {
-      return SESSION_BACKEND_X11;
-    }
-  }
-
-  if (wayland_display != NULL && wayland_display[0] != '\0') {
-    return SESSION_BACKEND_WAYLAND;
-  }
-
-  if (display != NULL && display[0] != '\0') {
-    return SESSION_BACKEND_X11;
-  }
-
-  return SESSION_BACKEND_UNKNOWN;
-}
-
-const char *SessionBackendName(SessionBackend backend) {
-  switch (backend) {
-  case SESSION_BACKEND_WAYLAND:
-    return "Wayland";
-  case SESSION_BACKEND_X11:
-    return "X11";
-  case SESSION_BACKEND_UNKNOWN:
-  default:
-    return "Unknown";
-  }
-}
 
 void FreeSelectionResult(SelectionResult *result) {
   if (result != NULL) {
@@ -62,82 +23,6 @@ void FreeSelectionResult(SelectionResult *result) {
     result->rel_x = 0.0f;
     result->rel_y = 0.0f;
   }
-}
-
-AppConfig AppConfigFromArgs(int argc, char **argv) {
-  AppConfig config = {0};
-
-  config.window_width = DEFAULT_WINDOW_WIDTH;
-  config.window_height = DEFAULT_WINDOW_HEIGHT;
-  config.renderer.cols = DEFAULT_COLS;
-  config.renderer.spacing = DEFAULT_SPACING;
-  config.renderer.angle = 0.0f; // vertical by default
-  config.backend = DetectSessionBackend();
-
-  static struct option long_options[] = {{"cols", required_argument, 0, 'c'},
-                                         {"spacing", required_argument, 0, 's'},
-                                         {"angle", required_argument, 0, 'a'},
-                                         {0, 0, 0, 0}};
-
-  int opt;
-  int option_index = 0;
-  char *endptr;
-
-  opterr = 0;
-
-  while ((opt = getopt_long(argc, argv, "c:s:a:", long_options,
-                            &option_index)) != -1) {
-    switch (opt) {
-    case 'c': {
-      errno = 0;
-      long val = strtol(optarg, &endptr, 10);
-      if (errno == 0 && *endptr == '\0' && val >= 1) {
-        config.renderer.cols = (int)val;
-      } else {
-        fprintf(stderr,
-                "Warning: Invalid columns '%s', falling back to default %d\n",
-                optarg, DEFAULT_COLS);
-      }
-      break;
-    }
-    case 's': {
-      errno = 0;
-      float val = strtof(optarg, &endptr);
-      if (errno == 0 && *endptr == '\0' && val >= 0.0f) {
-        config.renderer.spacing = val;
-      } else {
-        fprintf(stderr,
-                "Warning: Invalid spacing '%s', falling back to default %.1f\n",
-                optarg, DEFAULT_SPACING);
-      }
-      break;
-    }
-    case 'a': {
-      errno = 0;
-      float val = strtof(optarg, &endptr);
-      if (errno == 0 && *endptr == '\0') {
-        config.renderer.angle = val;
-      } else {
-        fprintf(stderr,
-                "Warning: Invalid angle '%s', falling back to default 0.0\n",
-                optarg);
-      }
-      break;
-    }
-    case '?':
-      fprintf(stderr, "Warning: Ignored unknown or incomplete option.\n");
-      break;
-    default:
-      break;
-    }
-  }
-
-  if (optind < argc) {
-    config.wallpaper.directory = argv[optind];
-  } else {
-    config.wallpaper.directory = NULL;
-  }
-  return config;
 }
 
 int AppRun(const AppConfig *config) {

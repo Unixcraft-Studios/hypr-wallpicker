@@ -11,6 +11,8 @@ wallpicker \- interactive wallpaper selector with hexagonal thumbnail UI
 [\fB\-c\fR \fIn\fR]
 [\fB\-s\fR \fIpx\fR]
 [\fB\-a\fR \fIdeg\fR]
+[\fB\-C\fR \fIpath\fR]
+[\fB\-t\fR]
 [\fIdirectory\fR]
 .SH DESCRIPTION
 .B wallpicker
@@ -25,9 +27,8 @@ Subsequent executions load directly from matching cache entries.
 Clicking a thumbnail computes the relative X and Y screen coordinates of the selection and tries to execute the runtime hook.
 If no hook exists, it falls back to a minimal built-in apply logic.
 .SH OPTIONS
-The following parameters control the output format.
-.B wallpicker
-does not currently implement \fB\-h\fR or \fB\-\-help\fR flags.
+Command-line values override the runtime file, which overrides built-in defaults.
+Invalid options or values are errors.
 .TP
 .BR \-c ", " \-\-cols " " \fIn\fR
 Arrange thumbnails in \fIn\fR columns.
@@ -40,8 +41,37 @@ Set the gap between adjacent hexagons to \fIpx\fR pixels.
 .BR \-a ", " \-\-angle " " \fIdeg\fR
 Rotate the grid layout by \fIdeg\fR degrees clockwise.
 .TP
+.BR \-C ", " \-\-config " " \fIpath\fR
+Load this required runtime TOML file instead of the automatically selected file.
+.TP
+.BR \-t ", " \-\-check-config
+Validate configuration, print the effective settings as TOML, and exit.
+.TP
+.BR \-h ", " \-\-help
+Print usage and exit without reading configuration files.
+.TP
 .I directory
 A single optional positional argument specifying the directory to scan for wallpaper images.
+.SH CONFIGURATION
+The session selects runtime-wayland.toml or runtime-x11.toml below
+$XDG_CONFIG_HOME/hypr-wallpicker/runtime.
+An unset, empty or relative XDG_CONFIG_HOME falls back to $HOME/.config.
+XDG_SESSION_TYPE (wayland or x11) takes precedence, followed by
+WAYLAND_DISPLAY and DISPLAY. An unknown session skips automatic loading.
+Missing automatic files use defaults; other read or validation errors are fatal.
+.PP
+The TOML schema requires integer schema_version = 1.
+Optional tables are [wallpaper] (directory) and [renderer] (cols, spacing, angle).
+Unknown fields and invalid types are rejected.
+Directory must be absolute or start with ~/; only the latter expands HOME.
+CLI directories may be relative; they are anchored to the current working
+directory without checking existence or collapsing symlinks or .. components.
+Empty paths are rejected. Printed configuration can be read back with --config.
+Columns must fit a positive C int; spacing and angle must be finite C floats,
+and spacing must be non-negative. Nonzero values that underflow to zero during
+conversion are rejected in both TOML and CLI input.
+Configuration is read once at startup. Presets, config.toml compilation,
+engine selection and post-hooks are not implemented by this loader.
 .SH FILES
 .TP
 .I $HOME/Pictures/wallpapers
@@ -67,6 +97,9 @@ The source repository ships with examples (e.g., \fIscripts/apply-wallpaper-wayl
 These are examples only and are not auto-installed runtime hooks.
 .SH ENVIRONMENT
 .TP
+.B XDG_CONFIG_HOME
+Base directory for runtime configuration only. The legacy hook path is unchanged.
+.TP
 .B HOME
 Required by \fBwallpicker\fR to resolve the default wallpaper directory, cache directory, and runtime hook path.
 .TP
@@ -77,8 +110,11 @@ Optional base directory for the thumbnail cache.
 .B 0
 Normal success.
 .TP
-.B >0
-Non-zero on initialization, path resolution, memory allocation, or setup failures.
+.B 2
+Invalid command-line options or runtime configuration.
+.TP
+.B 1
+Initialization, path resolution, memory allocation, setup, or stdout write failure.
 .SH EXAMPLES
 Launch with the default wallpaper directory:
 .PP

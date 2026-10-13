@@ -2,3 +2,4 @@ wallpicker
 *.o
 .cache/
 compile_commands.json
+/tests/

@@ -1,0 +1,8 @@
+Upstream: https://github.com/cktan/tomlc17
+Revision: fba134d7d1f9b58414f908600b2869f7e55ff2c4
+Files: src/tomlc17.c, src/tomlc17.h, LICENSE
+License: MIT (see LICENSE in this directory)
+Local modifications: none.
+
+Compiled directly into wallpicker. No system installation or build-time
+download is required. Update the three files together and rerun make test.

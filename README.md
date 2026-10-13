@@ -42,6 +42,58 @@ untouched.
 
 ---
 
+### Runtime configuration
+
+Save your wallpaper directory and grid preferences in a TOML file. Wallpicker
+loads these settings each time it starts, and command-line options override
+the saved values.
+
+Place the file in `~/.config/hypr-wallpicker/runtime/`, using the name for your
+session:
+
+- Wayland: `runtime-wayland.toml`
+- X11: `runtime-x11.toml`
+
+If you use `XDG_CONFIG_HOME`, place it under
+`$XDG_CONFIG_HOME/hypr-wallpicker/runtime/` instead. Wallpicker uses its built-in
+defaults when the session's configuration file is absent.
+
+```toml
+schema_version = 1
+
+[wallpaper]
+directory = "~/Pictures/wallpapers"
+
+[renderer]
+cols = 5
+spacing = 15.0
+angle = 0.0
+```
+
+Keep `schema_version = 1` and include the settings you want to customize.
+Omitted settings use their defaults. Set `directory` to an absolute path or a
+path beginning with `~/`. Use a positive integer for `cols`, a non-negative
+pixel value for `spacing`, and degrees for `angle`.
+
+Ready-to-use examples are available for
+[Wayland](examples/runtime-wayland.toml) and [X11](examples/runtime-x11.toml).
+You can also select a file with `--config` and adjust individual settings for
+one launch:
+
+```sh
+wallpicker --config examples/runtime-wayland.toml --cols 7
+```
+
+To check your settings, use `--check-config`. It validates the configuration,
+prints the effective values as TOML, and exits:
+
+```sh
+wallpicker --check-config
+wallpicker --config examples/runtime-wayland.toml --check-config
+```
+
+Run `wallpicker --help` to see all command-line options.
+
 ### Runtime Behavior
 
 `hypr-wallpicker` itself only handles wallpaper selection and thumbnail caching.

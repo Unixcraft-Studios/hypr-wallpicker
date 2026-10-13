@@ -6,7 +6,7 @@ ifeq ($(strip $(JPEG_LIBS)),)
 $(error libjpeg development files are required; install libjpeg-turbo)
 endif
 
-CPPFLAGS = -Iinclude $(JPEG_CFLAGS)
+CPPFLAGS = -Iinclude -Ivendor/tomlc17 $(JPEG_CFLAGS)
 
 CFLAGS = -O2 -Wall -Wextra -Werror
 DEBUG_CFLAGS = -g -O0 -Wall -Wextra -Werror
@@ -14,7 +14,8 @@ DEBUG_CFLAGS = -g -O0 -Wall -Wextra -Werror
 LDFLAGS =
 LDLIBS = -lraylib -lm -ldl -lpthread -lrt $(JPEG_LIBS)
 
-SRC = src/main.c src/app.c src/apply.c src/fs.c src/jpeg_loader.c src/wallpaper.c src/ui.c src/render.c
+SRC = src/main.c src/app.c src/apply.c src/fs.c src/jpeg_loader.c src/wallpaper.c src/ui.c src/render.c src/runtime_config.c vendor/tomlc17/tomlc17.c
+HEADERS = $(wildcard include/*.h) vendor/tomlc17/tomlc17.h
 TARGET = wallpicker
 
 PREFIX ?= /usr/local
@@ -22,7 +23,7 @@ BINDIR ?= $(PREFIX)/bin
 
 all: $(TARGET)
 
-$(TARGET): $(SRC)
+$(TARGET): $(SRC) $(HEADERS)
 	$(CC) $(CPPFLAGS) $(CFLAGS) $(SRC) -o $(TARGET) $(LDFLAGS) $(LDLIBS)
 
 debug: CFLAGS = $(DEBUG_CFLAGS)

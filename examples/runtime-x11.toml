@@ -1,0 +1,9 @@
+schema_version = 1
+
+[wallpaper]
+directory = "~/Pictures/wallpapers"
+
+[renderer]
+cols = 5
+spacing = 15.0
+angle = 0.0
