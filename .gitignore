@@ -1,4 +1,6 @@
 wallpicker
-*.o
+src/*.o
+vendor/raylib/build/
 .cache/
 compile_commands.json
+

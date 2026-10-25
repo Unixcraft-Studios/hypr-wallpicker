@@ -2,7 +2,6 @@
 
 #include "wallpaper.h"
 #include "fs.h"
-#include "jpeg_loader.h"
 #include "raylib.h"
 
 #include <dirent.h>
@@ -16,7 +15,6 @@
 static Image GenerateHexMask(int size, float radius, float angle_deg);
 static int CountWallpapers(const char *dir_path);
 static bool LoadSingleWallpaper(App *app, const char *filename);
-static Image LoadSourceImage(const char *file_path);
 static bool ExportThumbnail(Image image, const char *cache_path);
 
 bool InitWallpaperResources(App *app) {
@@ -175,7 +173,7 @@ static bool LoadSingleWallpaper(App *app, const char *filename) {
   }
 
   if (img.data == NULL) {
-    img = LoadSourceImage(full_img_path);
+    img = LoadImage(full_img_path);
 
     if (img.data != NULL && img.width > 1) {
       float scaleX = (float)app->img_size / (float)img.width;
@@ -247,13 +245,6 @@ cleanup:
   return ok;
 }
 
-static Image LoadSourceImage(const char *file_path) {
-  if (HasExtension(file_path, ".jpg") || HasExtension(file_path, ".jpeg")) {
-    return LoadJpegImage(file_path);
-  }
-
-  return LoadImage(file_path);
-}
 
 static bool ExportThumbnail(Image image, const char *cache_path) {
   int needed;
