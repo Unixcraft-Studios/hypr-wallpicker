@@ -19,7 +19,8 @@ It operates on a directory of images and produces a transparent, undecorated ray
 
 The thumbnails are generated deterministically and cached as follows:
 On the first run, supported images are resized, clipped to a hexagonal mask, and written to the cache directory.
-Subsequent executions load directly from the cache.
+Cache identity includes the source file and thumbnail recipe, so changing an image or the grid angle generates a fresh thumbnail.
+Subsequent executions load directly from matching cache entries.
 
 Clicking a thumbnail computes the relative X and Y screen coordinates of the selection and tries to execute the runtime hook.
 If no hook exists, it falls back to a minimal built-in apply logic.
@@ -46,8 +47,11 @@ A single optional positional argument specifying the directory to scan for wallp
 .I $HOME/Pictures/wallpapers
 Default wallpaper directory.
 .TP
-.I $HOME/.cache/wallpicker
-Cache directory for hex-masked thumbnails.
+.I $XDG_CACHE_HOME/wallpicker/thumbnails-v2
+Cache directory for hex-masked thumbnails. If
+.B XDG_CACHE_HOME
+is unset, this resolves to
+.I $HOME/.cache/wallpicker/thumbnails-v2.
 .TP
 .I $HOME/.config/hypr-wallpicker/apply-wallpaper.sh
 Runtime hook path.
@@ -65,6 +69,9 @@ These are examples only and are not auto-installed runtime hooks.
 .TP
 .B HOME
 Required by \fBwallpicker\fR to resolve the default wallpaper directory, cache directory, and runtime hook path.
+.TP
+.B XDG_CACHE_HOME
+Optional base directory for the thumbnail cache.
 .SH EXIT STATUS
 .TP
 .B 0
