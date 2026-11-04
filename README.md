@@ -18,19 +18,61 @@ Hypr-wallpicker a standalone hexagonal wallpaper selector... for Both Wayland an
 
 By utilizing raw `C` and `Raylib`, it bypasses the overhead and bloated dependencies typical of modern JS/Electron UI frameworks.
 
-This tool adheres to the Unix philosophy—it handles the visual selection of wallpapers and delegates the actual desktop drawing to Wayland daemons (`awww`) and theming engines (`matugen`) via standard shell commands. 
+This tool adheres to the Unix philosophy, it handles the visual selection of wallpapers and delegates the actual desktop drawing to Wayland daemons (`awww`) and theming engines (`matugen`) via standard shell commands. 
 
 ## Dependencies
+
+---
 
 ### Core / Build Dependencies
 
 To build `hypr-wallpicker`, you need:
 
-- `gcc`
-- `raylib`
+- GCC (C compiler)
+- GNU Make
+- CMake
+- Git (including submodule support)
+- Platform development libraries required by raylib.
 
-`hypr-wallpicker` links against your system `raylib` library.
+**raylib 6.2 is included as a pinned Git submodule** under `vendor/raylib/`.
 
+A system-installed raylib package is no longer required. The build system compiles the vendored raylib source into a static library (`libraylib.a`) and links it with the application.
+
+This ensures a consistent raylib version across builds without depending on the distribution's installed raylib release.
+
+### raylib Build Configuration
+
+raylib is compiled through CMake with customized build options:
+
+The application source is compiled with `-O2 -Wall -Wextra -Werror`. Vendored raylib is compiled separately using CMake.
+
+Static linking applies to raylib; other system libraries may remain dynamically linked.
+
+---
+
+### Build
+
+Clone the repository with its Git submodules:
+
+```bash
+git clone --recurse-submodules https://github.com/Horizon0427/hypr-wallpicker.git
+cd hypr-wallpicker
+```
+
+Build the release binary:
+
+```bash
+make
+```
+
+> The build system compiles raylib 6.2 from the vendored source and links it with `hypr-wallpicker`. `hypr-wallpicker` does not require or interfere with your system build of raylib if you have one.
+
+To force fresh raylib CMake build:
+
+```bash
+rm -rf vendor/raylib/build
+make
+```
 ---
 
 ### Runtime Behavior
@@ -39,7 +81,7 @@ To build `hypr-wallpicker`, you need:
 
 When a wallpaper is selected, it:
 
-1. checks for an optional user hook at  
+1. checks for an optional user hook at
    `~/.config/hypr-wallpicker/apply-wallpaper.sh`
 2. if no hook is present, it falls back to the built-in apply behavior
 

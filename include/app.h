@@ -40,12 +40,20 @@ typedef enum {
 } SessionBackend;
 
 typedef struct {
-  const char *wallpaper_dir;
-  int window_width;
-  int window_height;
+  const char *directory;
+} WallpaperConfig;
+
+typedef struct {
   int cols;
   float spacing;
   float angle;
+} RendererConfig;
+
+typedef struct {
+  WallpaperConfig wallpaper;
+  int window_width;
+  int window_height;
+  RendererConfig renderer;
   SessionBackend backend;
 } AppConfig;
 
@@ -60,8 +68,6 @@ typedef struct {
   Image hex_mask;
   int img_size;
 
-  float scroll_offset;
-  float target_scroll_offset;
   float angle;
 } App;
 

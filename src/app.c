@@ -69,9 +69,9 @@ AppConfig AppConfigFromArgs(int argc, char **argv) {
 
   config.window_width = DEFAULT_WINDOW_WIDTH;
   config.window_height = DEFAULT_WINDOW_HEIGHT;
-  config.cols = DEFAULT_COLS;
-  config.spacing = DEFAULT_SPACING;
-  config.angle = 0.0f; // vertical by default
+  config.renderer.cols = DEFAULT_COLS;
+  config.renderer.spacing = DEFAULT_SPACING;
+  config.renderer.angle = 0.0f; // vertical by default
   config.backend = DetectSessionBackend();
 
   static struct option long_options[] = {{"cols", required_argument, 0, 'c'},
@@ -92,7 +92,7 @@ AppConfig AppConfigFromArgs(int argc, char **argv) {
       errno = 0;
       long val = strtol(optarg, &endptr, 10);
       if (errno == 0 && *endptr == '\0' && val >= 1) {
-        config.cols = (int)val;
+        config.renderer.cols = (int)val;
       } else {
         fprintf(stderr,
                 "Warning: Invalid columns '%s', falling back to default %d\n",
@@ -104,7 +104,7 @@ AppConfig AppConfigFromArgs(int argc, char **argv) {
       errno = 0;
       float val = strtof(optarg, &endptr);
       if (errno == 0 && *endptr == '\0' && val >= 0.0f) {
-        config.spacing = val;
+        config.renderer.spacing = val;
       } else {
         fprintf(stderr,
                 "Warning: Invalid spacing '%s', falling back to default %.1f\n",
@@ -116,7 +116,7 @@ AppConfig AppConfigFromArgs(int argc, char **argv) {
       errno = 0;
       float val = strtof(optarg, &endptr);
       if (errno == 0 && *endptr == '\0') {
-        config.angle = val;
+        config.renderer.angle = val;
       } else {
         fprintf(stderr,
                 "Warning: Invalid angle '%s', falling back to default 0.0\n",
@@ -133,9 +133,9 @@ AppConfig AppConfigFromArgs(int argc, char **argv) {
   }
 
   if (optind < argc) {
-    config.wallpaper_dir = argv[optind];
+    config.wallpaper.directory = argv[optind];
   } else {
-    config.wallpaper_dir = NULL;
+    config.wallpaper.directory = NULL;
   }
   return config;
 }
@@ -152,8 +152,8 @@ int AppRun(const AppConfig *config) {
     return 1;
   }
 
-  if (config->wallpaper_dir != NULL) {
-    app.wp_dir = strdup(config->wallpaper_dir);
+  if (config->wallpaper.directory != NULL) {
+    app.wp_dir = strdup(config->wallpaper.directory);
     if (app.wp_dir == NULL) {
       fprintf(stderr, "Error: out of memory\n");
       return 1;
@@ -168,7 +168,7 @@ int AppRun(const AppConfig *config) {
   SetConfigFlags(FLAG_WINDOW_TRANSPARENT | FLAG_WINDOW_UNDECORATED);
   InitWindow(config->window_width, config->window_height, "wallpicker");
 
-  app.angle = config->angle;
+  app.angle = config->renderer.angle;
   if (!InitWallpaperResources(&app)) {
     fprintf(stderr, "Error: failed to initialize wallpaper resources\n");
     AppShutdown(&app);
