@@ -16,6 +16,7 @@ wallpicker \- interactive wallpaper selector with hexagonal thumbnail UI
 .B wallpicker
 is an interactive utility for producing wallpaper selections.
 It operates on a directory of images and produces a transparent, undecorated raylib window containing a hexagonal grid of thumbnails.
+Supported image formats are PNG and JPEG (.png, .jpg, and .jpeg).
 
 The thumbnails are generated deterministically and cached as follows:
 On the first run, supported images are resized, clipped to a hexagonal mask, and written to the cache directory.
@@ -50,7 +51,7 @@ Default wallpaper directory.
 .I $XDG_CACHE_HOME/wallpicker/thumbnails-v2
 Cache directory for hex-masked thumbnails. If
 .B XDG_CACHE_HOME
-is unset, this resolves to
+is unset or empty, this resolves to
 .I $HOME/.cache/wallpicker/thumbnails-v2.
 .TP
 .I $HOME/.config/hypr-wallpicker/apply-wallpaper.sh
@@ -101,6 +102,8 @@ Launch with an absolute path and custom grid layout:
 .I /mnt/media/walls
 .RE
 .SH NOTES
+The application links statically against the pinned raylib submodule, built with JPEG support enabled.
+
 The built-in fallback logic is intentionally minimal right now.
 It only conditionally attempts to execute
 .BR awww (1)
@@ -110,7 +113,7 @@ All legacy post-commands (such as symlinking, matugen execution, and hyprland re
 Custom hooks are the intended portability path for handling differences between Wayland and X11 environments for now.
 
 Official documentation and updates can be found at the project repository:
-.UR https://github.com/Horizon0427/hypr-wallpicker
+.UR https://github.com/Unixcraft-Studios/hypr-wallpicker
 .UE
 .SH AUTHORS
 .B Horizon0427
