@@ -4,7 +4,7 @@
   <img src="./demonstration/logo.png" alt="Hypr-wallpicker Logo" width="250">
 </div>
 
-Hypr-wallpicker a standalone hexagonal wallpaper selector... for Both Wayland and X11
+Hypr-wallpicker a standalone hexagonal wallpaper selector... for Both Wayland and X11!
 
 ![showcase](./demonstration/showcase.gif)
 
@@ -20,10 +20,6 @@ By utilizing raw `C` and `Raylib`, it bypasses the overhead and bloated dependen
 
 This tool adheres to the Unix philosophy, it handles the visual selection of wallpapers and delegates the actual desktop drawing to Wayland daemons (`awww`) and theming engines (`matugen`) via standard shell commands. 
 
-## Dependencies
-
----
-
 ### Core / Build Dependencies
 
 To build `hypr-wallpicker`, you need:
@@ -36,17 +32,31 @@ To build `hypr-wallpicker`, you need:
 
 **raylib 6.2 is included as a pinned Git submodule** under `vendor/raylib/`.
 
-A system-installed raylib package is no longer required. The build system compiles the vendored raylib source into a static library (`libraylib.a`) and links it with the application.
+A system-installed raylib package is no longer required. 
 
-This ensures a consistent raylib version across builds without depending on the distribution's installed raylib release.
+The build system compiles the vendored raylib source into a static library (`libraylib.a`) and links it with the application. This ensures a consistent raylib version across builds without depending on the distribution's installed raylib release.
 
 ### raylib Build Configuration
 
 raylib is compiled through CMake with customized build options:
 
-The application source is compiled with `-O2 -Wall -Wextra -Werror`. Vendored raylib is compiled separately using CMake.
+```
+-DCMAKE_BUILD_TYPE=Release
+-DBUILD_SHARED_LIBS=OFF 
+-DCMAKE_POLICY_VERSION_MINIMUM=3.10 
+-DBUILD_EXAMPLES=OFF 
+-DCUSTOMIZE_BUILD=ON 
+-DSUPPORT_FILEFORMAT_JPG=ON
+-DSUPPORT_MODULE_RAUDIO=ON 
+-DSUPPORT_FILEFORMAT_MOD=OFF 
+-DSUPPORT_FILEFORMAT_XM=OFF
+```
 
-Static linking applies to raylib; other system libraries may remain dynamically linked.
+The main application source is compiled with `-O2 -Wall -Wextra -Werror`. 
+
+raylib is compiled separately using CMake, using `--parallel` to speep up compilation.
+
+Static linking applies to raylib, other system libraries may remain dynamically linked.
 
 ---
 
@@ -119,11 +129,12 @@ If you use the provided X11 example hook, the exact runtime tools depend on your
 Common options include:
 
 - `i3wm` **(required)**
-- `feh` or `nitrogen` — set wallpaper on X11
-- `wal` / `pywal` *(optional)* — generate colors from the selected wallpaper
-- `i3-msg` *(optional)* — reload or restart i3-managed components
-- `polybar-msg` *(optional)* — reload Polybar if used
-- custom user scripts for compositor, bar, or theme reloads
+- `feh` or `nitrogen` - set wallpaper on X11
+- ![Pythonic-Palette-Generator](https://github.com/Unixcraft-Studios/Pythonic-Palette-Generator) / `pywal` *(optional)* - generate colors from the selected wallpaper.
+- `rofi` *(optional)* - often used in place of `dmenu`(default).
+- `polybar` *(optional)* - often used in place of `i3bar`(default).
+- `picom` *(optional but recommended)*
+- custom scripts for compositor, monitor/s config(via `xrandr`), bar, or other environment changes should all reside in `~/.config/i3` and be called via i3 through `~/.config`.
 
 > The X11 example hook is a starting point and may need adjustments depending on your environment.
 > (only supported environment right now is i3)
@@ -153,7 +164,7 @@ Remove the installed binary:
 sudo make uninstall
 ```
 
-Reinstall the binary:
+Reinstall the main binary:
 
 ```bash
 sudo make reinstall
@@ -173,8 +184,7 @@ Run with a custom wallpaper directory:
 ```bash
 wallpicker /path/to/wallpapers
 ```
-The first time you use this program, it will generate cached files of wallpapers, which may take a short time. Please be 
-patient.
+The first time you use this program, it will generate cached files of wallpapers.
 
 ---
 
@@ -188,14 +198,14 @@ To use one, copy it to the runtime hook path expected by `hypr-wallpicker`:
 
 `~/.config/hypr-wallpicker/apply-wallpaper.sh`
 
-Wayland / Hyprland example:
+Wayland/Hyprland example:
 
 ```bash
 mkdir -p ~/.config/hypr-wallpicker
 cp scripts/apply-wallpaper-wayland.example.sh ~/.config/hypr-wallpicker/apply-wallpaper.sh
 chmod +x ~/.config/hypr-wallpicker/apply-wallpaper.sh
 ```
-X11 / i3 example:
+X11/i3 example:
 
 ```bash
 mkdir -p ~/.config/hypr-wallpicker
@@ -204,18 +214,3 @@ chmod +x ~/.config/hypr-wallpicker/apply-wallpaper.sh
 ```
 
 ---
-
-### Display the interface in full-screen mode
-
-In Hyprland, please add this in `~/.config/hypr/hyprland.lua`:
-```
-hl.window_rule({
-    name         = "wall-paper-picker",
-    match        = { class = "^(wallpicker)$" },
-    fullscreen   = true,
-    center       = true,
-    stay_focused = true,
-})
-```
-
-
