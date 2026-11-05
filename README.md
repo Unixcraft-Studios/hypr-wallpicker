@@ -36,7 +36,7 @@ A system-installed raylib package is no longer required.
 
 The build system compiles the vendored raylib source into a static library (`libraylib.a`) and links it with the application. This ensures a consistent raylib version across builds without depending on the distribution's installed raylib release.
 
-### raylib Build Configuration
+#### raylib Build Configuration
 
 raylib is compiled through CMake with customized build options:
 
@@ -60,7 +60,7 @@ Static linking applies to raylib, other system libraries may remain dynamically 
 
 ---
 
-### Build
+#### Build, Install & Run
 
 Clone the repository with its Git submodules:
 
@@ -74,6 +74,42 @@ Build the release binary:
 ```bash
 make
 ```
+
+#### Install
+
+Install the binary to `/usr/local/bin`:
+
+```bash
+sudo make install
+```
+
+Remove the installed binary:
+
+```bash
+sudo make uninstall
+```
+
+Reinstall the main binary:
+
+```bash
+sudo make reinstall
+```
+---
+
+#### Run
+
+Run with the default wallpaper directory at `~/Pictures/wallpapers`:
+
+```bash
+wallpicker
+```
+
+Run with a custom wallpaper directory:
+
+```bash
+wallpicker /path/to/wallpapers
+```
+The first time you use this program, it will generate cached files of wallpapers.
 
 > The build system compiles raylib 6.2 from the vendored source and links it with `hypr-wallpicker`. `hypr-wallpicker` does not require or interfere with your system build of raylib if you have one.
 
@@ -138,53 +174,6 @@ Common options include:
 
 > The X11 example hook is a starting point and may need adjustments depending on your environment.
 > (only supported environment right now is i3)
-
-## Build, Install & Run
-
-### Build
-
-Build the release binary:
-
-```bash
-make
-```
----
-
-### Install
-
-Install the binary to `/usr/local/bin`:
-
-```bash
-sudo make install
-```
-
-Remove the installed binary:
-
-```bash
-sudo make uninstall
-```
-
-Reinstall the main binary:
-
-```bash
-sudo make reinstall
-```
----
-
-### Run
-
-Run with the default wallpaper directory at `~/Pictures/wallpapers`:
-
-```bash
-wallpicker
-```
-
-Run with a custom wallpaper directory:
-
-```bash
-wallpicker /path/to/wallpapers
-```
-The first time you use this program, it will generate cached files of wallpapers.
 
 ---
 
