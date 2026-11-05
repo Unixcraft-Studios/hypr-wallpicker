@@ -153,7 +153,7 @@ Remove the installed binary:
 sudo make uninstall
 ```
 
-Perform a clean rebuild and reinstall:
+Reinstall the binary:
 
 ```bash
 sudo make reinstall
